@@ -1,0 +1,50 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Forms
+
+
+<PageTitle>Home</PageTitle>
+
+<h2>Eksempeloppgave - Rente</h2>
+
+<p>Hvor mye vil 10 000 kr vokse til etter 10 år med 3,4% rente?</p>
+
+<ul>
+    @foreach (var yearInfo in yearlyGrowth)
+    {
+        <li>@yearInfo</li>
+    }
+</ul>
+
+<p>@summary</p>
+
+
+@code {
+    private List<string> yearlyGrowth = new List<string>();
+    private string summary = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        EksempelOppgave();
+     
+    }
+
+    private void EksempelOppgave()
+    {
+        double startbeløp = 10000;
+        double kroner = startbeløp;
+
+        for (int year = 1; year <= 10; year++)
+        {
+            kroner *= 1.034;
+            yearlyGrowth.Add($"Etter {year} år har {startbeløp} kr vokst til {kroner:F2}.");
+        }
+
+        double verdiøkning = kroner - startbeløp;
+        double prosentøkning = (verdiøkning / startbeløp) * 100;
+        summary = $"Det har vært en verdiøkning på {verdiøkning:F2} kr som er en prosentøkning på {prosentøkning:F2}%.";
+    }
+
+
+
+}

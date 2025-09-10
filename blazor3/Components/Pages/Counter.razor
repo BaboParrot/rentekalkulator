@@ -1,0 +1,99 @@
+﻿@page "/rentekalkulator"
+@rendermode InteractiveServer
+
+<h2>Rente Kalkulator (Interaktiv)</h2>
+
+<div>
+    <label>Startbeløp (kr):</label>
+    <input type="number" @bind="startbeløp" step="0.01" />
+</div>
+
+<div>
+    <label>Rente (%):</label>
+    <input type="number" @bind="renteProsent" step="0.01" />
+</div>
+
+<div>
+    <label>Antall år:</label>
+    <input type="number" @bind="år" />
+</div>
+
+<button @onclick="CalculateGrowth" style="margin-top: 10px;">Beregn</button>
+
+@if (yearlyGrowth != null && yearlyGrowth.Count > 0)
+{
+    <h3>Resultater:</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>År</th>
+                <th>Balanse (kr)</th>
+                <th>Rente opptjent (kr)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in yearlyGrowth)
+            {
+                <tr>
+                    <td>@entry.Year</td>
+                    <td>@entry.Balance.ToString("F2")</td>
+                    <td>@entry.Interest.ToString("F2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p>@summary</p>
+}
+
+@code {
+    // User input values
+    private double startbeløp { get; set; } = 10000;
+    private double renteProsent { get; set; } = 3.4;
+    private int år { get; set; } = 10;
+
+    // Yearly result
+    private class YearEntry
+    {
+        public int Year { get; set; }
+        public double Balance { get; set; }
+        public double Interest { get; set; }
+    }
+
+    private List<YearEntry>? yearlyGrowth;
+    private string summary = string.Empty;
+
+    private void CalculateGrowth()
+    {
+        // Validate input
+        if (startbeløp <= 0 || renteProsent < 0 || år <= 0)
+        {
+            yearlyGrowth = null;
+            summary = "Vennligst fyll inn gyldige tall i alle feltene.";
+            return;
+        }
+
+        yearlyGrowth = new List<YearEntry>();
+        double balance = startbeløp;
+        double rate = renteProsent / 100;
+
+        for (int i = 1; i <= år; i++)
+        {
+            double interest = balance * rate;
+            balance += interest;
+
+            yearlyGrowth.Add(new YearEntry
+            {
+                Year = i,
+                Balance = balance,
+                Interest = interest
+            });
+        }
+
+        double totalInterest = balance - startbeløp;
+        double totalPercent = (totalInterest / startbeløp) * 100;
+
+        summary = $"Etter {år} år vokser {startbeløp} kr til {balance:F2} kr " +
+                  $"({totalInterest:F2} kr i rente, {totalPercent:F2}%).";
+    }
+}
